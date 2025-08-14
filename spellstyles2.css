@@ -1,0 +1,238 @@
+/*
+  新增的 CSS：為了讓預覽時能完整顯示所有卡片，
+  將整個頁面縮小。這不會影響到列印的實際尺寸。
+*/
+.book {
+    transform-origin: top center; /* 讓縮放從頂部中央開始 */
+    transform: scale(1); /* 這裡的數字可以根據你的螢幕大小微調 */
+    /* 移除 width: 100%; */
+}
+
+/* ... 你的其他 CSS 規則保持不變 ... */
+
+/* ==================================== */
+/* 1. 全域 CSS 變數與字體設定            */
+/* ==================================== */
+body {
+    font-family: "Noto Sans TC", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.card-level,
+.card-round,
+.card-id {
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 700;
+}
+
+.card-chinese,
+.card-english {
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 400;
+}
+
+.page {
+    /* 紙張尺寸：寬度為 10 張卡片，高度自動調整 */
+    width: 1050mm; /* 105mm * 10 */
+    height: auto;
+    min-height: 89.1mm;
+    margin: 0mm auto;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: white;
+
+    display: grid;
+    /* Grid 欄位：每行 10 個欄位，每個寬度 105mm */
+    grid-template-columns: repeat(10, 105mm);
+    /* Grid 列：高度自動 */
+    grid-template-rows: auto;
+    gap: 0;
+    padding: 0;
+    box-sizing: border-box;
+    page-break-after: always;
+    justify-items: start;
+    align-items: start;
+}
+
+#app .page {
+    grid-template-columns: repeat(10, 105mm) !important;
+}
+
+.page:last-child {
+    page-break-after: auto;
+}
+
+.id-card {
+    /* 卡片尺寸：寬度 105mm，高度 89.1mm */
+    width: 105mm;
+    height: 99mm;
+    position: relative;
+    border: none;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    text-align: center;
+    background-image: url("./speech.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* ==================================== */
+/* 3. 卡片內部文字樣式 (保持不變)          */
+/* ==================================== */
+.card-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    display: block;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.card-content p {
+    /* position: absolute; */
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+/* Level */
+.card-level {
+    position: absolute;
+    top: 38mm;
+    left: 30mm;
+    color: #004ea1;
+    font-size: 2.6em;
+    font-weight: bold;
+}
+.card-level.is-D {
+    left: 36mm;
+}
+
+.card-round {
+    position: absolute;
+    top: 38mm;
+    left: 63mm;
+    color: #c31f1e;
+    font-size: 2.6em;
+    font-weight: bold;
+}
+
+.card-id {
+    position: absolute;
+    top: 38mm;
+    left: 63%;
+    transform: translateX(-50%);
+    color: #004ea1;
+    font-size: 2.7em;
+    font-weight: bold;
+}
+
+/*
+ * 新增的 CSS：只針對中英文名字的容器進行排版
+ */
+.name-container {
+    /* 使用絕對定位將整個容器置中 */
+    position: absolute;
+    top: 58mm; /* 垂直位置，根據你的需求調整 */
+    left: 50%; /* 水平置中的起點 */
+    transform: translateX(-50%); /* 讓容器的中心點與卡片中心點重疊 */
+
+    /* 使用 Flexbox 讓裡面的名字並排 */
+    display: flex;
+    justify-content: center; /* 讓內容在容器中水平置中 */
+    gap: 5mm; /* 設定中英文名字之間的間距，你可以調整這個數值 */
+}
+
+/*
+ * 新增的 CSS：處理中英文名字在 Flexbox 容器內的樣式
+ */
+.card-chinese,
+.card-english {
+    /* 移除所有定位屬性，讓 Flexbox 處理位置 */
+    position: static;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+
+    color: #333;
+    font-size: 2.7em;
+    font-weight: bold;
+}
+/* 4. 列印與裁切線樣式                     */
+/* ==================================== */
+@media print {
+    body {
+        background-color: white;
+    }
+    .book {
+        box-shadow: none;
+        margin: 0;
+    }
+    .page {
+        width: 1050mm;
+        height: auto;
+        min-height: 89.1mm;
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        break-after: auto; /* 移除 page-break-after，讓所有卡片在同一頁 */
+        grid-template-columns: repeat(10, 105mm);
+        grid-template-rows: auto;
+    }
+
+    .id-card {
+        border: none;
+        box-shadow: none;
+        width: 105mm;
+        height: 89.1mm;
+        margin: 0;
+    }
+
+    /* 垂直裁切線 */
+    .id-card:not(:nth-child(10n))::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1px;
+        height: 100%;
+        background-color: transparent;
+        border-right: 1px dashed #999;
+    }
+
+    /* 水平裁切線 */
+    .id-card::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: transparent;
+        border-bottom: 1px dashed #999;
+    }
+
+    /* 最後一排卡片不需要底部的裁切線 */
+    .page > .id-card:nth-last-child(-n + 10)::before {
+        display: none;
+    }
+
+    .page {
+        box-shadow: none !important;
+    }
+    .id-card {
+        box-shadow: none !important;
+    }
+}

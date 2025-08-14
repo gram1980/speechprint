@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>JS Bin</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+
+    <body>
+        <div class="book" id="app">
+            <!-- <div class="page" id="page1">
+
+        </div> -->
+        </div>
+    </body>
+    <script>
+        let app = document.getElementById("app");
+        let inner = "";
+        let length = 0;
+        let xhr = new XMLHttpRequest();
+        xhr.open("GET", "./校區json檔/修正.json", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let data = JSON.parse(xhr.responseText);
+
+                if (data.length % 4 == 0) {
+                    length = data.length / 4;
+                } else {
+                    length = Math.ceil(data.length / 4);
+                }
+
+                for (let j = 0; j < length; j++) {
+                    inner += `
+                <div class="page" id="page${j}">
+                    ${child(j)}
+                </div>
+                `;
+                }
+                app.innerHTML = inner;
+
+                function child(index) {
+                    let innerchild = "";
+                    let min = index * 4;
+                    let max = min + 4;
+
+                    if (max > data.length) {
+                        max = data.length;
+                    }
+
+                    for (let i = min; i < max; i++) {
+                        innerchild += `<div class="license">
+                        <img src="./taipeiback.jpg" alt="" class="backgroundimg">
+                            <table class="myTable">
+                                <tr>
+                                    <td rowspan="7" >
+                                        <div id="photo"><img src="./img/JH/${
+                                            data[i].studentphoto
+                                        }.jpg"></div>    
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="narrow-td">准考證號碼</td>
+                                    <td>${data[i].testnumber}</td>
+                                </tr>
+                                <tr>
+                                    <td class="narrow-td">中文姓名</td>
+                                    <td>${data[i].studentname}</td>
+                                </tr>
+                                <tr>
+                                    <td class="narrow-td">英文姓名</td>
+                                    <td>${data[i].englishname}</td>
+                                </tr>
+                                <tr>
+                                    <td class="narrow-td">報考組別</td>
+                                    <td>${data[i].testlevel}</td>
+                                </tr>
+                                <tr>
+                                    <td class="narrow-td">考試日期</td>
+                                    <td>11/${
+                                        data[i].location == "台灣大學" ? 24 : 24
+                                    }(日)</td>
+                                </tr>
+                                <tr>
+                                    <td class="narrow-td">考試地點</td>
+                                    <td>${data[i].location}</td>
+                                </tr>
+                            </table>
+                            <div id="location">
+                                <p>${data[i].classroom}</p>
+                            </div>
+                        </div>`;
+                    }
+                    console.log(data);
+                    return innerchild;
+                }
+            }
+        };
+        xhr.send();
+    </script>
+</html>

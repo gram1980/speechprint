@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>拼字朗誦比賽名牌列印</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="spellstyles2.css" />
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    </head>
+    <body>
+        <button
+            id="exportHighResImageBtn"
+            style="
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 999;
+                padding: 10px 20px;
+                font-size: 16px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            "
+        >
+            匯出高畫質圖片
+        </button>
+
+        <div class="book" id="app"></div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const app = document.getElementById("app");
+                // 調整 cardsPerPage 數值為 10，以符合每行 10 張卡片的佈局
+                const cardsPerPage = 10;
+
+                async function fetchCardData() {
+                    try {
+                        const response = await fetch("./spell/rans.json");
+                        if (!response.ok) {
+                            throw new Error(
+                                `HTTP error! status: ${response.status}`
+                            );
+                        }
+                        const data = await response.json();
+                        renderIDCards(data);
+                    } catch (error) {
+                        console.error("無法載入證件資料:", error);
+                        app.innerHTML =
+                            "<p>載入證件資料失敗，請檢查檔案路徑或網路連線。</p>";
+                    }
+                }
+
+                function renderIDCards(cards) {
+                    let pagesHtml = "";
+                    const totalPages = Math.ceil(cards.length / cardsPerPage);
+
+                    for (let i = 0; i < totalPages; i++) {
+                        const startIndex = i * cardsPerPage;
+                        const endIndex = Math.min(
+                            startIndex + cardsPerPage,
+                            cards.length
+                        );
+                        const cardsOnPage = cards.slice(startIndex, endIndex);
+
+                        let cardsHtml = "";
+                        cardsOnPage.forEach((card) => {
+                            const levelClass =
+                                card.level && card.level.trim() === "D"
+                                    ? " is-D"
+                                    : "";
+
+                            cardsHtml += `
+                                    <div class="id-card">
+ 
+        <div class="card-content">
+            <p class="card-level${levelClass}">${card.level}</p>
+            
+            <p class="card-id">${card.id}</p>
+            <div class="name-container">
+                <p class="card-chinese">${card.chinese}</p>
+                <p class="card-english">${card.english}</p>
+            </div>
+        </div>
+    </div>
+                            `;
+                        });
+                        pagesHtml += `
+                            <div class="page" id="page${i + 1}">
+                                ${cardsHtml}
+                            </div>
+                        `;
+                    }
+                    app.innerHTML = pagesHtml;
+                }
+
+                fetchCardData();
+
+                // 匯出高畫質圖片的程式碼
+                const exportBtn = document.getElementById(
+                    "exportHighResImageBtn"
+                );
+                if (exportBtn) {
+                    exportBtn.addEventListener("click", () => {
+                        exportBtn.style.display = "none"; // 隱藏按鈕避免截圖時出現
+
+                        const element = document.getElementById("app");
+                        html2canvas(element, { scale: 5 }).then(function (
+                            canvas
+                        ) {
+                            const link = document.createElement("a");
+                            link.download = "high-res-cards.png";
+                            link.href = canvas.toDataURL("image/png", 1.0);
+                            link.click();
+
+                            exportBtn.style.display = "block"; // 恢復按鈕顯示
+                        });
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>
